@@ -17,7 +17,7 @@ AU = 149.6e6 * 1000
 
 FONT = pygame.font.SysFont("comicsans", 16)
 
-def format_meters_to_kilometers(meters):
+def format_meters_to_AU(meters):
 		kilometers = meters / AU
 		return f"{kilometers:.3f} AU"
 
@@ -43,6 +43,7 @@ class Planet:
 		self.y_vel = 0
 		self.perigee = 1000000000000 # large number so first value of perigee will always be smaller
 		self.apogee = 0
+		self.eccentricity = 0
 
 	def draw(self, win):
 		x = self.x * self.SCALE + WIDTH / 2
@@ -61,7 +62,7 @@ class Planet:
 		pygame.draw.circle(win, self.color, (x, y), self.radius)
 		
 		if not self.sun:
-			distance_text = FONT.render(f"{self.name} [{format_meters_to_kilometers(self.perigee)}, {format_meters_to_kilometers(self.apogee)}] ", 1, GREEN)
+			distance_text = FONT.render(f"{self.name} [{format_meters_to_AU(self.perigee)}, {format_meters_to_AU(self.apogee)}, {self.eccentricity:.3f}] ", 1, GREEN)
 			win.blit(distance_text, (x - distance_text.get_width()/2, y - distance_text.get_height()/2))
 
 	def attraction(self, other):
@@ -77,6 +78,7 @@ class Planet:
 		elif self.distance_to_sun > self.apogee:
 			self.apogee = self.distance_to_sun
 
+		self.eccentricity = (self.apogee - self.perigee)/(self.apogee + self.perigee + 1)
 		force = self.G * self.mass * other.mass / distance**2
 		theta = math.atan2(distance_y, distance_x)
 		force_x = math.cos(theta) * force
